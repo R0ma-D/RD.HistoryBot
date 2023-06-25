@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using RD.HistoryBot.App.DAL;
+using RD.HistoryBot.App.DAL.InMemory;
 using RD.HistoryBot.App.Model;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
@@ -25,12 +26,26 @@ namespace RD.HistoryBot.App
             try
             {
                 _memoryCache = new MemoryCache(new MemoryCacheOptions());
-
+                _questionRepository = new InMemoryQuestionRepository();
+                
                 var config = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json")
                     .AddUserSecrets(typeof(Program).GetTypeInfo().Assembly)
                     .AddEnvironmentVariables()
                     .Build();
+
+                var testStudents = config["Bot:Admins"]?
+                    .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => x.Trim())
+                    .Select(x => new Student
+                    {
+                        Login = x,
+                        UserName = x,
+                        ExpirationDate = DateTime.UtcNow.AddDays(1),
+                        AvailableThemes = "1-5",
+                    }).ToArray() ?? Array.Empty<Student>();
+
+                _studentRepository = new InMemoryStudentRepository(testStudents);
 
                 var botClient = GetBotClient(config);
 

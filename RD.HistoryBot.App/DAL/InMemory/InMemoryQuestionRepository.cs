@@ -9,20 +9,6 @@ namespace RD.HistoryBot.App.DAL.InMemory
 {
     internal class InMemoryQuestionRepository : IQuestionRepository
     {
-        //public int TopicNumber { get; set; }
-        //public int QuestionNumber { get; set; }
-        //public string AlternativeOption { get; set; }
-        //public string Header { get; set; }
-        //public string Body { get; set; }
-        //public string Footer { get; set; }
-        //public string Image { get; set; }
-        //public AnswerMode AnswerMode { get; set; }
-        //public string CorrectAnswer { get; set; }
-        //public List<string> PossibleAnswers { get; set; }
-        //public string MessageAfterCorrectAnswer { get; set; }
-        //public string MessageAfterIncorrectAnswer { get; set; }
-
-
         private static readonly List<Question> _questions = new List<Question>()
         {
             new Question() {
