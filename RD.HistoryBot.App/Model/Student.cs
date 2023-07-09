@@ -35,5 +35,10 @@ namespace RD.HistoryBot.App.Model
         ///     Последнее прохождение теста
         /// </summary>
         public Passage LastUsage { get; set; }
+
+        public bool IsTopicAvailable(int topicNumber)
+        {
+            return true;
+        }
     }
 }

@@ -76,5 +76,10 @@ namespace RD.HistoryBot.App.Model
         ///     Слова поддержки и пояснение в случае неправильного ответа
         /// </summary>
         public string MessageAfterIncorrectAnswer { get; set; }
+
+        public bool IsCorrectAnswer(string text)
+        {
+            return string.Equals(CorrectAnswer, text, StringComparison.InvariantCultureIgnoreCase);
+        }
     }
 }

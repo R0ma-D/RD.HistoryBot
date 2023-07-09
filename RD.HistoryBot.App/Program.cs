@@ -13,20 +13,15 @@ namespace RD.HistoryBot.App
 {
     internal class Program
     {
-        private const string TELEGRAM_PREFIX = "t.me/";
-
-        private static IMemoryCache _memoryCache;
-        private static IStudentRepository _studentRepository;
-        private static IQuestionRepository _questionRepository;
-
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             Log("Starting history bot...");
             
             try
             {
-                _memoryCache = new MemoryCache(new MemoryCacheOptions());
-                _questionRepository = new InMemoryQuestionRepository();
+                var memoryCache = new MemoryCache(new MemoryCacheOptions());
+                var topicRepository = new InMemoryTopicRepository();
+                var questionRepository = new InMemoryQuestionRepository();
                 
                 var config = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json")
@@ -45,7 +40,8 @@ namespace RD.HistoryBot.App
                         AvailableThemes = "1-5",
                     }).ToArray() ?? Array.Empty<Student>();
 
-                _studentRepository = new InMemoryStudentRepository(testStudents);
+                var studentRepository = new InMemoryStudentRepository(testStudents);
+                var messageHandler = new MessageHandler(studentRepository, topicRepository, questionRepository, memoryCache);
 
                 var botClient = GetBotClient(config);
 
@@ -55,15 +51,16 @@ namespace RD.HistoryBot.App
                 {
                     AllowedUpdates = { }, // receive all update types
                 };
-
+                
                 botClient.StartReceiving(
-                    HandleUpdateAsync,
-                    HandleErrorAsync,
+                    messageHandler.HandleUpdateAsync,
+                    messageHandler.HandleErrorAsync,
                     receiverOptions,
                     cancellationToken
                 );
+                var me = await botClient.GetMeAsync(cancellationToken);
 
-                Log("Bot is ready");
+                Log($"Bot {me.Username} is ready");
 
                 while (true)
                 {
@@ -87,61 +84,6 @@ namespace RD.HistoryBot.App
         {
             var token = config["Bot:Token"];
             return new TelegramBotClient(token!);
-        }
-
-        private static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
-        {
-            if (update.Type == UpdateType.Message)
-            {
-                var message = update.Message;
-                var text = message?.Text?.ToLower();
-
-                switch (text)
-                {
-                    case "/start":
-                        await Start(botClient, message!);
-                        return;
-                }
-
-            }
-            else if (update.Type == UpdateType.CallbackQuery)
-            {
-
-            }
-        }
-
-        private static Task Start(ITelegramBotClient botClient, Message message)
-        {
-            var userName = GetUserName(message);
-            if (string.IsNullOrEmpty(userName))
-                return Messages.AccountNotDefined(botClient, message.Chat.Id);
-
-            var student = _studentRepository.GetByLogin(userName);
-            if (student == null)
-                return Messages.AccountNotFound(botClient, message.Chat.Id, userName);
-
-            if (student.ExpirationDate < DateTime.UtcNow)
-                return Messages.AccountExpired(botClient, message.Chat.Id, userName);
-
-            var userId = message.From.Id;
-            return Task.CompletedTask;
-        }
-
-        private static string GetUserName(Message userMessage)
-        {
-            var userName = userMessage.From.Username ?? string.Empty;
-            if (userName.StartsWith(TELEGRAM_PREFIX, StringComparison.OrdinalIgnoreCase))
-                userName = userName.Substring(TELEGRAM_PREFIX.Length);
-
-            return userName;
-        }
-
-        
-
-
-        private static async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
-        {
-            Log(exception);
         }
 
         private static void Log(string message)

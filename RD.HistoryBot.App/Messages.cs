@@ -17,10 +17,25 @@ namespace RD.HistoryBot.App
             => botClient.SendTextMessageAsync(chatId,
                 $"Не найдены данные Вашего аккаунта '{userName}'. Пожалуйста, обратитесь к преподавателю, чтобы он добавил Ваш телеграм-аккаунт в таблицу пользователей этого чата.");
 
-
         public static Task AccountExpired(ITelegramBotClient botClient, long chatId, string userName)
             => botClient.SendTextMessageAsync(chatId,
                 $"Истёк срок использования этого чата-бота Вашим аккаунтом {userName}. Пожалуйста, обратитесь к преподавателю, чтобы он продлил Ваше обучение.");
+
+        public static Task Greating(ITelegramBotClient botClient, long chatId, string studentName)
+            => botClient.SendTextMessageAsync(chatId,
+                $"Привет, {studentName}! Добро пожаловать в чат для подготовки к сдачи ЦТ по истории Беларуси.\r\nВведи номер темы, которую хочешь потренировать, например 1 😉");
+
+        public static Task SelectTheme(ITelegramBotClient botClient, long chatId, string availableThemes)
+            => botClient.SendTextMessageAsync(chatId,
+                $"Введите номер темы, которую хотите сдать. Доступны: '{availableThemes}'");
+
+        public static Task StartTheme(ITelegramBotClient botClient, long chatId, string themeName)
+            => botClient.SendTextMessageAsync(chatId,
+                $"Приступим к теме '{themeName}'");
+
+        public static Task EndTheme(ITelegramBotClient botClient, long chatId, string themeName)
+            => botClient.SendTextMessageAsync(chatId,
+                $"Поздравляю с завершением темы '{themeName}'!");
 
     }
 }
