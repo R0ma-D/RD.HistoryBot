@@ -1,7 +1,11 @@
 ﻿using System.Reflection;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Services;
+using Google.Apis.Sheets.v4;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using RD.HistoryBot.App.DAL;
+using RD.HistoryBot.App.DAL.Google;
 using RD.HistoryBot.App.DAL.InMemory;
 using RD.HistoryBot.App.Model;
 using Telegram.Bot;
@@ -20,8 +24,6 @@ namespace RD.HistoryBot.App
             try
             {
                 var memoryCache = new MemoryCache(new MemoryCacheOptions());
-                var topicRepository = new InMemoryTopicRepository();
-                var questionRepository = new InMemoryQuestionRepository();
                 
                 var config = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json")
@@ -40,7 +42,15 @@ namespace RD.HistoryBot.App
                         AvailableThemes = "1-5",
                     }).ToArray() ?? Array.Empty<Student>();
 
+                var sheetService = GetSheetsService(config);
+                var t = new GoogleTopicAndQuestionRepository(sheetService, config["Google:QuestionFile"]);
+                await t.Reload();
+                return;
+
+                var topicRepository = new InMemoryTopicRepository();
+                var questionRepository = new InMemoryQuestionRepository();
                 var studentRepository = new InMemoryStudentRepository(testStudents);
+
                 var messageHandler = new MessageHandler(studentRepository, topicRepository, questionRepository, memoryCache);
 
                 var botClient = GetBotClient(config);
@@ -84,6 +94,17 @@ namespace RD.HistoryBot.App
         {
             var token = config["Bot:Token"];
             return new TelegramBotClient(token!);
+        }
+
+        private static SheetsService GetSheetsService(IConfiguration config)
+        {
+            var serviceAccountJson = config["Google:Account"];
+            return new SheetsService(new BaseClientService.Initializer()
+            {
+                ApplicationName = "history-bot",
+                HttpClientInitializer = GoogleCredential.FromJson(serviceAccountJson)
+                    .CreateScoped(new[] { SheetsService.Scope.Spreadsheets }),
+            });
         }
 
         private static void Log(string message)

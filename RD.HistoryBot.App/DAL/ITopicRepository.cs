@@ -23,6 +23,6 @@ namespace RD.HistoryBot.App.DAL
         /// </summary>
         /// <param name="id">Номер темы</param>
         /// <returns>Тему</returns>
-        Topic GetTopic(int id);
+        Topic? GetTopic(int id);
     }
 }
