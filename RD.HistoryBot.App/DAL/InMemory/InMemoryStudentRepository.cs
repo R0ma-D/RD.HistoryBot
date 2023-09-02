@@ -16,9 +16,9 @@ namespace RD.HistoryBot.App.DAL.InMemory
             _students = students.ToList();
         }
 
-        public Student? GetByLogin(string login)
+        public Task<Student?> GetByLogin(string login)
         {
-            return _students.FirstOrDefault(x => x.Login == login);
+            return Task.FromResult(_students.FirstOrDefault(x => x.Login == login));
         }
 
         public void SavePassage(Student student, Passage passage)

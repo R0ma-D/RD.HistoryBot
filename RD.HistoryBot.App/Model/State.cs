@@ -14,12 +14,12 @@ namespace RD.HistoryBot.App.Model
         /// <summary>
         ///     Текущая тема
         /// </summary>
-        public Topic Topic { get; set; }
+        public Topic? Topic { get; set; }
 
         /// <summary>
         ///     Текущий вопрос темы
         /// </summary>
-        public Question Question { get; set; }
+        public Question? Question { get; set; }
 
         /// <summary>
         ///     Альтернативы, которые использовали

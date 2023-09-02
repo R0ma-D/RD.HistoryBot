@@ -20,7 +20,7 @@ namespace RD.HistoryBot.App.DAL.InMemory
             new Topic() { Number = 6, Title = "Тема 6" },
         };
 
-        public Topic GetTopic(int id)
+        public Topic? GetTopic(int id)
         {
             return _topics.FirstOrDefault(t => t.Number == id);
         }

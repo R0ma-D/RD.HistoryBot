@@ -43,15 +43,11 @@ namespace RD.HistoryBot.App
                     }).ToArray() ?? Array.Empty<Student>();
 
                 var sheetService = GetSheetsService(config);
-                var t = new GoogleTopicAndQuestionRepository(sheetService, config["Google:QuestionFile"]);
-                await t.Reload();
-                return;
+                var topicAndQuestionRepository = new GoogleTopicAndQuestionRepository(sheetService, config["Google:QuestionFile"]!);
+                var studentRepository = new GoogleStudentRepository(sheetService, config["Google:StudentFile"]!);
+                await Task.WhenAll(topicAndQuestionRepository.Reload(), studentRepository.Reload());
 
-                var topicRepository = new InMemoryTopicRepository();
-                var questionRepository = new InMemoryQuestionRepository();
-                var studentRepository = new InMemoryStudentRepository(testStudents);
-
-                var messageHandler = new MessageHandler(studentRepository, topicRepository, questionRepository, memoryCache);
+                var messageHandler = new MessageHandler(studentRepository, topicAndQuestionRepository, topicAndQuestionRepository, memoryCache);
 
                 var botClient = GetBotClient(config);
 

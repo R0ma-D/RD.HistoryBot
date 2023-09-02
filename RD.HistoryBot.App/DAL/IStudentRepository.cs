@@ -12,7 +12,7 @@ namespace RD.HistoryBot.App.DAL
         /// </summary>
         /// <param name="login">Логин ученика</param>
         /// <returns>Возвращает данные об ученике</returns>
-        Student? GetByLogin(string login);
+        Task<Student?> GetByLogin(string login);
 
         /// <summary>
         ///     Сохранить попытку прохождения темы

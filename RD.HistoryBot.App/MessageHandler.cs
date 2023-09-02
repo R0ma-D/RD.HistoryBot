@@ -196,7 +196,7 @@ namespace RD.HistoryBot.App
                 return null;
             }
 
-            student = _studentRepository.GetByLogin(userName);
+            student = await _studentRepository.GetByLogin(userName);
             if (student == null)
             {
                 await Messages.AccountNotFound(botClient, message.Chat.Id, userName);
